@@ -12,41 +12,114 @@
             align-items: center;
             height: 100vh;
             margin: 0;
-            color: rgb(201, 32, 32);
-            background: #000;
             font-family: monospace;
+            flex-direction: column;
+            background: #1a1a1a;
+            color: #eeeeee;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        body.light {
+            background: #fff;
+            color: rgb(0, 120, 140);
+        }
+
+        #date {
+            font-size: clamp(0.8rem, 3vw, 3rem);
+            text-align: center;
+            margin-bottom: 0.5rem;
         }
 
         #clock {
-            font-size: 20rem;
+            font-size: clamp(3rem, 18vw, 20rem);
             text-align: center;
+        }
+
+        #elapsed {
+            font-size: clamp(1.2rem, 5.5vw, 6rem);
+            text-align: center;
+        }
+
+        #log {
+            font-size: clamp(0.8rem, 2.2vw, 2.5rem);
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        #toggle {
+            position: fixed;
+            bottom: clamp(12px, 3vw, 24px);
+            right: clamp(12px, 3vw, 24px);
+            background: none;
+            border: 2px solid currentColor;
+            color: inherit;
+            font-family: monospace;
+            font-size: clamp(0.75rem, 2vw, 1.1rem);
+            padding: 0.4em 0.9em;
+            border-radius: 999px;
+            cursor: pointer;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+        }
+
+        #toggle:hover {
+            opacity: 1;
         }
     </style>
     <script src="slog.js"></script>
 </head>
 
 <body>
+    <div id="date"></div>
     <div id="clock">00:00:00</div>
-    <div id="log">
-    </div>
+    <div id="elapsed"></div>
+    <div id="log"></div>
+    <button id="toggle" onclick="toggleMode()">light</button>
     <script>
+        let clockInTime = null;
+
+        function pad(n) {
+            return String(n).padStart(2, '0');
+        }
+
+        const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
         function updateClock() {
             const now = new Date();
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const seconds = String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('clock').textContent =
+                `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+            document.getElementById('date').textContent =
+                `${DAYS[now.getDay()]} ${pad(now.getMonth() + 1)} ${pad(now.getDate())} ${now.getFullYear()}`;
 
-            document.getElementById('clock').textContent = `${hours}:${minutes}:${seconds}`;
+            if (clockInTime) {
+                const elapsed = Math.floor((now - clockInTime) / 1000);
+                const h = Math.floor(elapsed / 3600);
+                const m = Math.floor((elapsed % 3600) / 60);
+                const s = elapsed % 60;
+                document.getElementById('elapsed').textContent = `${pad(h)}:${pad(m)}:${pad(s)}`;
+            }
+        }
+
+        function toggleMode() {
+            const light = document.body.classList.toggle('light');
+            document.getElementById('toggle').textContent = light ? 'dark' : 'light';
+            localStorage.setItem('theme', light ? 'light' : 'dark');
+        }
+
+        if (localStorage.getItem('theme') === 'light') {
+            document.body.classList.add('light');
+            document.getElementById('toggle').textContent = 'dark';
         }
 
         setInterval(updateClock, 1000);
         updateClock();
 
-        const dat = fetchLastRow();
-        document.getElementById("log").innerHTML = `
-        <h2>${user.name}</h2>
-        <p>Age: ${user.age}</p>
-    `;
+        fetchLastRow().then(row => {
+            if (!row) return;
+            const [timestamp, client, task] = row;
+            clockInTime = new Date(timestamp);
+            document.getElementById('log').textContent = task ? `${client} — ${task}` : client;
+        });
     </script>
 </body>
 
