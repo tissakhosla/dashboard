@@ -22,11 +22,13 @@
             text-align: center;
         }
     </style>
+    <script src="slog.js"></script>
 </head>
 
 <body>
     <div id="clock">00:00:00</div>
-
+    <div id="log">
+    </div>
     <script>
         function updateClock() {
             const now = new Date();
@@ -38,7 +40,13 @@
         }
 
         setInterval(updateClock, 1000);
-        updateClock(); // Initialize clock display on page load
+        updateClock();
+
+        const dat = fetchLastRow();
+        document.getElementById("log").innerHTML = `
+        <h2>${user.name}</h2>
+        <p>Age: ${user.age}</p>
+    `;
     </script>
 </body>
 
