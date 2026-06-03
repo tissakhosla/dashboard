@@ -8,13 +8,16 @@ export default {
       return cors(new Response(null, { status: 204 }));
     }
 
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${SHEET_NAME}?key=${env.GOOGLE_API_KEY}`;
-    const res = await fetch(url);
-    const data = await res.json();
-    const rows = data.values ?? [];
-    const lastRow = rows[rows.length - 1] ?? [];
-
-    return cors(Response.json(lastRow));
+    try {
+      const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${SHEET_NAME}?key=${env.GOOGLE_API_KEY}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      const rows = data.values ?? [];
+      const lastRow = rows[rows.length - 1] ?? [];
+      return cors(Response.json(lastRow));
+    } catch (e) {
+      return cors(new Response(JSON.stringify({ error: e.message }), { status: 500 }));
+    }
   }
 };
 
@@ -22,5 +25,6 @@ function cors(res) {
   const headers = new Headers(res.headers);
   headers.set('Access-Control-Allow-Origin', ALLOWED_ORIGIN);
   headers.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  headers.set('Content-Type', 'application/json');
   return new Response(res.body, { status: res.status, headers });
 }
