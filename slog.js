@@ -1,4 +1,4 @@
-const WORKER_URL = 'https://YOUR-WORKER.workers.dev';
+const WORKER_URL = 'https://dashboard.tissa-music.workers.dev';
 
 async function fetchLastRow() {
     const res = await fetch(WORKER_URL);
