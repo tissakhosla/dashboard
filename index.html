@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Digital Clock</title>
+    <title>Dashboard</title>
     <style>
         body {
             display: flex;
@@ -40,11 +40,105 @@
             text-align: center;
         }
 
-        #log {
+        #log-wrap {
+            display: flex;
+            align-items: center;
+            gap: 0.4em;
+            justify-content: center;
             font-size: clamp(0.8rem, 2.2vw, 2.5rem);
-            text-align: center;
             margin-top: 1rem;
         }
+
+        #switch-btn {
+            background: none;
+            border: none;
+            color: inherit;
+            font-family: monospace;
+            font-size: 0.8em;
+            cursor: pointer;
+            opacity: 0.5;
+            padding: 0;
+            transition: opacity 0.2s;
+        }
+
+        #switch-btn:hover { opacity: 1; }
+
+        #modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        #modal-overlay.open { display: flex; }
+
+        #modal {
+            background: #2a2a2a;
+            border: 1px solid #555;
+            border-radius: 8px;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            min-width: min(90vw, 320px);
+            font-family: monospace;
+        }
+
+        body.light #modal {
+            background: #f5f5f5;
+            border-color: #ccc;
+        }
+
+        #modal h3 { margin: 0; font-size: 1.1rem; }
+
+        #modal label {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+            font-size: 0.85rem;
+            opacity: 0.7;
+        }
+
+        #modal input {
+            background: #1a1a1a;
+            border: 1px solid #555;
+            color: #eee;
+            font-family: monospace;
+            font-size: 1rem;
+            padding: 0.4em 0.6em;
+            border-radius: 4px;
+            opacity: 1;
+        }
+
+        body.light #modal input {
+            background: #fff;
+            border-color: #aaa;
+            color: rgb(0, 120, 140);
+        }
+
+        #modal .modal-actions {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+        }
+
+        #modal .modal-actions button {
+            background: none;
+            border: 1px solid currentColor;
+            color: inherit;
+            font-family: monospace;
+            font-size: 0.9rem;
+            padding: 0.3em 0.8em;
+            border-radius: 4px;
+            cursor: pointer;
+            opacity: 0.7;
+        }
+
+        #modal .modal-actions button:hover { opacity: 1; }
+        #modal .modal-actions button.primary { opacity: 1; font-weight: bold; }
 
         #toggle {
             position: fixed;
@@ -73,15 +167,29 @@
     <div id="date"></div>
     <div id="clock">00:00:00</div>
     <div id="elapsed"></div>
-    <div id="log"></div>
+    <div id="log-wrap">
+        <span id="log"></span>
+        <button id="switch-btn" onclick="openModal()">↺</button>
+    </div>
     <button id="toggle" onclick="toggleMode()">light</button>
+
+    <div id="modal-overlay">
+        <div id="modal">
+            <h3>Switch Task</h3>
+            <label>Client<input id="modal-center" type="text" /></label>
+            <label>Task<input id="modal-notes" type="text" /></label>
+            <div class="modal-actions">
+                <button onclick="closeModal()">cancel</button>
+                <button class="primary" onclick="submitTask()">log</button>
+            </div>
+        </div>
+    </div>
     <script>
         let clockInTime = null;
+        let currentCenter = '';
+        let currentNotes = '';
 
-        function pad(n) {
-            return String(n).padStart(2, '0');
-        }
-
+        function pad(n) { return String(n).padStart(2, '0'); }
         const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
         function updateClock() {
@@ -90,7 +198,6 @@
                 `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
             document.getElementById('date').textContent =
                 `${DAYS[now.getDay()]} ${pad(now.getMonth() + 1)} ${pad(now.getDate())} ${now.getFullYear()}`;
-
             if (clockInTime) {
                 const elapsed = Math.floor((now - clockInTime) / 1000);
                 const h = Math.floor(elapsed / 3600);
@@ -115,10 +222,56 @@
         updateClock();
 
         fetchLastRow().then(row => {
-            if (!row) return;
+            if (!row || row.length === 0) return;
             const [timestamp, center, notes] = row;
             clockInTime = new Date(timestamp);
-            document.getElementById('log').textContent = notes ? `${center} — ${notes}` : center;
+            currentCenter = center || '';
+            currentNotes = notes || '';
+            updateLog();
+        });
+
+        function updateLog() {
+            document.getElementById('log').textContent =
+                currentNotes ? `${currentCenter} — ${currentNotes}` : currentCenter;
+        }
+
+        function openModal() {
+            document.getElementById('modal-center').value = currentCenter;
+            document.getElementById('modal-notes').value = currentNotes;
+            document.getElementById('modal-overlay').classList.add('open');
+            document.getElementById('modal-notes').focus();
+        }
+
+        function closeModal() {
+            document.getElementById('modal-overlay').classList.remove('open');
+        }
+
+        async function submitTask() {
+            const center = document.getElementById('modal-center').value.trim();
+            const notes = document.getElementById('modal-notes').value.trim();
+            if (!center) return;
+            const timestamp = new Date().toISOString();
+            try {
+                await postNewRow(timestamp, center, notes);
+                clockInTime = new Date(timestamp);
+                currentCenter = center;
+                currentNotes = notes;
+                updateLog();
+                closeModal();
+            } catch (e) {
+                alert('Failed to log: ' + e.message);
+            }
+        }
+
+        document.getElementById('modal-overlay').addEventListener('click', e => {
+            if (e.target === document.getElementById('modal-overlay')) closeModal();
+        });
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') closeModal();
+            if (e.key === 'Enter' && document.getElementById('modal-overlay').classList.contains('open')) {
+                submitTask();
+            }
         });
     </script>
 </body>
