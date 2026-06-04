@@ -83,11 +83,18 @@
             currentCenter = center || '';
             currentNotes = notes || '';
             updateLog();
+            setActiveClient(currentCenter);
         });
 
         function updateLog() {
             document.getElementById('log').textContent =
                 currentNotes ? `${currentCenter} — ${currentNotes}` : currentCenter;
+        }
+
+        function setActiveClient(client) {
+            document.querySelectorAll('.client-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.textContent === client);
+            });
         }
 
         function pickOther() {

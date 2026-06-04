@@ -88,6 +88,8 @@ body.light .client-btn { background: #e8e8e8; border-color: #bbb; color: rgb(0, 
 .client-btn:hover { background: #3a3a3a; border-color: #666; }
 body.light .client-btn:hover { background: #d8d8d8; }
 .client-btn:active { background: #444; }
+.client-btn.active { border-color: #aaa; background: #3d3d3d; }
+body.light .client-btn.active { border-color: rgb(0, 120, 140); background: #d0e8ec; }
 
 #other-wrap {
     display: none;
