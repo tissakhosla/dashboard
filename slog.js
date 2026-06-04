@@ -1,4 +1,4 @@
-const WORKER_URL = 'https://slog-proxy.tissa-music.workers.dev';
+const WORKER_URL = 'https://slog-api.tissa-music.workers.dev';
 
 async function fetchLastRow() {
     const res = await fetch(WORKER_URL);

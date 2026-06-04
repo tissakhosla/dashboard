@@ -12,7 +12,7 @@ export default {
       const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${SHEET_NAME}?key=${env.GOOGLE_API_KEY}`;
       const res = await fetch(url);
       const data = await res.json();
-      const rows = data.values ?? [];
+      const rows = (data.values ?? []).slice(1);
       const lastRow = rows[rows.length - 1] ?? [];
       return cors(Response.json(lastRow));
     } catch (e) {

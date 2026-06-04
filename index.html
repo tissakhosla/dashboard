@@ -116,9 +116,9 @@
 
         fetchLastRow().then(row => {
             if (!row) return;
-            const [timestamp, client, task] = row;
+            const [timestamp, center, notes] = row;
             clockInTime = new Date(timestamp);
-            document.getElementById('log').textContent = task ? `${client} — ${task}` : client;
+            document.getElementById('log').textContent = notes ? `${center} — ${notes}` : center;
         });
     </script>
 </body>
