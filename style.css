@@ -55,7 +55,7 @@ body.light {
     border: 1px solid #444;
     color: #eee;
     font-family: monospace;
-    font-size: 0.9rem;
+    font-size: 1rem;
     padding: 0.5em 0.6em;
     border-radius: 6px;
     resize: none;
@@ -105,7 +105,7 @@ body.light .client-btn.active { border-color: rgb(0, 120, 140); background: #d0e
     border: 1px solid #444;
     color: #eee;
     font-family: monospace;
-    font-size: 0.9rem;
+    font-size: 1rem;
     padding: 0.4em 0.6em;
     border-radius: 6px;
 }
