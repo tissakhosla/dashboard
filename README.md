@@ -40,3 +40,5 @@ npx wrangler secret put GOOGLE_SA_EMAIL      # client_email from service account
 npx wrangler secret put GOOGLE_SA_PRIVATE_KEY  # private_key from service account JSON
 npx wrangler deploy
 ```
+
+### Potential Upgrades
