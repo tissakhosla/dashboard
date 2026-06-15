@@ -36,8 +36,7 @@ export default {
       const res = await fetch(url);
       const data = await res.json();
       const rows = (data.values ?? []).slice(1);
-      const lastRow = rows[rows.length - 1] ?? [];
-      return cors(Response.json(lastRow));
+      return cors(Response.json(rows));
     } catch (e) {
       return cors(new Response(JSON.stringify({ error: e.message }), { status: 500 }));
     }

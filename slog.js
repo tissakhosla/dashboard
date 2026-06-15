@@ -1,10 +1,8 @@
 const WORKER_URL = 'https://slog-api.tissa-music.workers.dev';
 
-async function fetchLastRow() {
+async function fetchRows() {
     const res = await fetch(WORKER_URL);
-    const lastRow = await res.json();
-    console.log(lastRow);
-    return lastRow;
+    return res.json();
 }
 
 async function postNewRow(timestamp, center, notes) {
@@ -20,4 +18,3 @@ async function postNewRow(timestamp, center, notes) {
     return res.json();
 }
 
-fetchLastRow();

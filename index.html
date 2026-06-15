@@ -44,6 +44,7 @@
         let clockInTime = null;
         let currentCenter = '';
         let currentNotes = '';
+        let lastSelectedMap = {};
 
         function pad(n) { return String(n).padStart(2, '0'); }
         const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
@@ -77,14 +78,19 @@
         setInterval(updateClock, 1000);
         updateClock();
 
-        fetchLastRow().then(row => {
-            if (!row || row.length === 0) return;
-            const [timestamp, center, notes] = row;
+        fetchRows().then(rows => {
+            if (!rows || rows.length === 0) return;
+            rows.forEach(([timestamp, center]) => {
+                if (center && timestamp > (lastSelectedMap[center] ?? ''))
+                    lastSelectedMap[center] = timestamp;
+            });
+            const [timestamp, center, notes] = rows[rows.length - 1];
             clockInTime = new Date(timestamp);
             currentCenter = center || '';
             currentNotes = notes || '';
             updateLog();
             setActiveClient(currentCenter);
+            updateStaleness();
         });
 
         function updateLog() {
@@ -95,6 +101,22 @@
         function setActiveClient(client) {
             document.querySelectorAll('.client-btn').forEach(btn => {
                 btn.classList.toggle('active', btn.textContent === client);
+            });
+        }
+
+        function updateStaleness() {
+            const now = Date.now();
+            document.querySelectorAll('.client-btn').forEach(btn => {
+                const last = lastSelectedMap[btn.textContent];
+                const hours = last ? (now - new Date(last).getTime()) / 3600000 : Infinity;
+                if (hours < 3) {
+                    btn.style.filter = '';
+                } else {
+                    const t = Math.min((hours - 3) / 21, 1); // 0 at 3h → 1 at 24h
+                    const b = (1 - t * 0.5).toFixed(2);
+                    const c = (1 - t * 0.3).toFixed(2);
+                    btn.style.filter = `brightness(${b}) contrast(${c})`;
+                }
             });
         }
 
@@ -119,7 +141,10 @@
                 document.getElementById('notes').value = '';
                 document.getElementById('other-wrap').classList.remove('open');
                 document.getElementById('other-input').value = '';
+                lastSelectedMap[client] = timestamp;
                 updateLog();
+                setActiveClient(client);
+                updateStaleness();
             } catch (e) {
                 alert('Failed to log: ' + e.message);
             }
