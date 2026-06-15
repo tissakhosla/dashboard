@@ -42,3 +42,25 @@ npx wrangler deploy
 ```
 
 ### Potential Upgrades
+
+#### Settings
+1. Define buttons
+1. Define Freshness time (has to be touched every x hours)
+1. Define Minimum Duration to accept Freshness
+
+#### To Dos
+1. Build out todos page pulled from a file in my slipbox repo.
+
+
+#### Stale-client visual indicators
+Visually indicate buttons that haven't been selected for a given length of time. Options:
+
+- **Opacity fade** — stale buttons gradually dim toward ~40% opacity; recently used stay full opacity
+- **Color temperature drift** — recently used buttons retain full color; unused ones desaturate toward gray over time
+- **Age badge** — tiny `3d` / `2w` label in the corner of each button showing days/weeks since last pick; fits the monospace aesthetic well
+- **Border style shift** — border transitions from solid → dashed → dotted as a button ages
+- **Brightness/contrast dim** — `filter: brightness(0.5) contrast(0.7)` scaled to staleness; button looks "off" rather than just gray
+- **Freshness stripe** — 2px bottom-border accent that is vivid when recently used and drops away when stale
+- **Font weight** — recently used = `font-weight: bold`, long-unused = `font-weight: 300`
+
+Recommended: **opacity fade + age badge** combined — the button dims for at-a-glance signal, and the badge gives the precise duration on demand.
