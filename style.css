@@ -20,21 +20,22 @@ body.light {
     color: rgb(0, 120, 140);
 }
 
+#clock {
+    font-size: clamp(0.8rem, 3vw, 2rem);
+    text-align: center;
+}
+
 #date {
     font-size: clamp(0.8rem, 3vw, 2rem);
     text-align: center;
 }
 
-#clock {
+#elapsed {
+    line-height: 1;
     font-size: clamp(3rem, 16vw, 16rem);
     text-align: center;
-    line-height: 1;
 }
 
-#elapsed {
-    font-size: clamp(1rem, 4.5vw, 5rem);
-    text-align: center;
-}
 
 #log {
     font-size: clamp(0.8rem, 2vw, 2rem);
