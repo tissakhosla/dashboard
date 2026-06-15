@@ -81,8 +81,11 @@
         fetchRows().then(rows => {
             if (!rows || rows.length === 0) return;
             rows.forEach(([timestamp, center]) => {
-                if (center && timestamp > (lastSelectedMap[center] ?? ''))
-                    lastSelectedMap[center] = timestamp;
+                if (!center) return;
+                const key = center.trim();
+                const ms = new Date(timestamp).getTime();
+                if (!isNaN(ms) && ms > (lastSelectedMap[key] ?? 0))
+                    lastSelectedMap[key] = ms;
             });
             const [timestamp, center, notes] = rows[rows.length - 1];
             clockInTime = new Date(timestamp);
@@ -108,15 +111,11 @@
             const now = Date.now();
             document.querySelectorAll('.client-btn').forEach(btn => {
                 const last = lastSelectedMap[btn.textContent];
-                const hours = last ? (now - new Date(last).getTime()) / 3600000 : Infinity;
-                if (hours < 3) {
-                    btn.style.filter = '';
-                } else {
-                    const t = Math.min((hours - 3) / 21, 1); // 0 at 3h → 1 at 24h
-                    const b = (1 - t * 0.5).toFixed(2);
-                    const c = (1 - t * 0.3).toFixed(2);
-                    btn.style.filter = `brightness(${b}) contrast(${c})`;
-                }
+                const hours = last ? (now - last) / 3600000 : Infinity;
+                const tier = Math.min(Math.floor(hours / 3), 7);
+                btn.style.filter = '';
+                for (let i = 1; i <= 7; i++) btn.classList.remove('stale-' + i);
+                if (tier > 0) btn.classList.add('stale-' + tier);
             });
         }
 
@@ -141,7 +140,7 @@
                 document.getElementById('notes').value = '';
                 document.getElementById('other-wrap').classList.remove('open');
                 document.getElementById('other-input').value = '';
-                lastSelectedMap[client] = timestamp;
+                lastSelectedMap[client] = new Date(timestamp).getTime();
                 updateLog();
                 setActiveClient(client);
                 updateStaleness();
