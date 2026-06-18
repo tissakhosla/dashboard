@@ -131,7 +131,8 @@
 
         async function pickClient(client) {
             const notes = document.getElementById('notes').value.trim();
-            const timestamp = new Date().toISOString();
+            const _now = new Date();
+            const timestamp = `${_now.getMonth()+1}/${_now.getDate()}/${_now.getFullYear()} ${String(_now.getHours()).padStart(2,'0')}:${String(_now.getMinutes()).padStart(2,'0')}:${String(_now.getSeconds()).padStart(2,'0')}`;
             try {
                 await postNewRow(timestamp, client, notes);
                 clockInTime = new Date(timestamp);

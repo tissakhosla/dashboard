@@ -49,6 +49,7 @@ npx wrangler deploy
 1. Define Minimum Duration to accept Freshness
 
 #### To Dos
+1. In Reporting, print out todays log, or log for a prticular client. 
 1. Build out todos page pulled from a file in my slipbox repo.
 
 
